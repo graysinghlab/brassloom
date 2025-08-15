@@ -1,0 +1,194 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>BrassLoom — HBCU/MSI Grants Radar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 1.5rem; }
+    h1 { margin: 0; }
+    .muted { color: #555; font-size: 0.95rem; }
+    .toolbar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; }
+    input, select, button { padding: 0.5rem; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; vertical-align: top; }
+    th { background: #f5f5f5; }
+    .tag { display:inline-block; padding:0.1rem 0.4rem; border:1px solid #ccc; border-radius:999px; margin-right:0.25rem; }
+    .score { font-weight: 700; }
+    .pill { display:inline-block; padding:0.15rem 0.5rem; border-radius:999px; border:1px solid #ddd; margin-right:0.25rem;}
+    .warn { color: #a84200; font-weight: 700; }
+    .good { color: #126412; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>BrassLoom</h1>
+  <div class="muted">A focused radar for grant opportunities with a priority lens for HBCUs and MSIs.</div>
+
+  <div class="toolbar">
+    <button id="exportCSV">Export starred → CSV</button>
+    <button id="exportGSU">Export starred → GSU import CSV</button>
+    <button id="loadSample">Load sample data</button>
+    <label>Load JSON: <input type="file" id="fileInput" accept=".json"></label>
+    <label>Keyword filter: <input id="filter" placeholder="e.g., HBCU, MSI, biology"></label>
+    <label>Min score: <input id="minScore" type="number" min="0" value="0" style="width:6rem"></label>
+    <button id="sortScore">Sort by score</button>
+    <button id="sortDate">Sort by date</button>
+  </div>
+
+  <div id="status" class="muted"></div>
+
+  <table id="tbl">
+    <thead>
+      <tr>
+        <th>★</th><th>Score</th>
+        <th>Title</th>
+        <th>Agency</th>
+        <th>Posted</th>
+        <th>Closes</th>
+        <th>Eligibility</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+
+let STAR = new Set(JSON.parse(localStorage.getItem("brassloom.starred")||"[]"));
+function toggleStar(id){
+  if (STAR.has(id)) STAR.delete(id); else STAR.add(id);
+  localStorage.setItem("brassloom.starred", JSON.stringify(Array.from(STAR)));
+  render();
+}
+function rowHtml(r){
+  const id = r.url || r.id || r.title;
+  const starred = STAR.has(id) ? "★" : "☆";
+  const tags = (r.tags||[]).map(t=>`<span class="tag">${t}</span>`).join(" ");
+  const scoreClass = r.hbcu_msi_score >= 20 ? "good" : (r.hbcu_msi_score >= 10 ? "" : "warn");
+  return `<tr>
+    <td style="width:3rem; text-align:center; cursor:pointer" onclick="toggleStar('${id.replace("'", "\\'")}')">${starred}</td>
+    <td class="score ${scoreClass}">${r.hbcu_msi_score ?? ""}</td>
+    <td>
+      <a href="${r.url}" target="_blank">${r.title}</a>
+      <div class="muted">${r.description || ""}</div>
+      <div>${tags}</div>
+    </td>
+    <td>${r.agency || r.source || ""}</td>
+    <td>${r.posted_date || ""}</td>
+    <td>${r.close_date || ""}</td>
+    <td>${r.eligibility || ""}</td>
+  </tr>`
+}
+function exportCSV(rows){
+  const header = ["title","agency","source","posted_date","close_date","eligibility","url","hbcu_msi_score"];
+  const csv = [header.join(",")].concat(rows.map(r=>header.map(h=>JSON.stringify(r[h]||"")).join(","))).join("\n");
+  const blob = new Blob([csv], {type:"text/csv"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "brassloom_starred.csv"; a.click();
+}
+function exportGSUCSV(rows){
+  // Minimal columns aligned to GSU Proposals sheet to pre-seed import
+  const header = ["Title","SponsorName","SponsorType","FundingOpportunity","InternalDeadline","DueDate","SubmissionMechanism","ProposalType","Status","Notes"];
+  const today = new Date().toISOString().slice(0,10);
+  function sponsorType(agency){
+    const a = (agency||"").toLowerCase();
+    if (a.includes("national science") || a.includes("nih") || a.includes("nasa") || a.includes("department of") || a.includes("grants.gov")) return "Federal";
+    if (a.includes("board of regents") || a.includes("state")) return "State";
+    return "Nonprofit";
+  }
+  function mechanism(r){
+    const url = (r.url||"").toLowerCase();
+    const src = (r.source||r.agency||"").toLowerCase();
+    if (src.includes("nsf")) return "Research.gov";
+    if (src.includes("nih")) return "S2S (eRA)";
+    if (url.includes("grants.gov")) return "Grants.gov";
+    return "Other";
+  }
+  function iso(d){ if(!d) return ""; return String(d).slice(0,10); }
+  const rows2 = rows.map(r=>[
+    r.title || "",
+    r.agency || r.source || "",
+    sponsorType(r.agency || r.source || ""),
+    r.id || r.assistance_listing || "",
+    "", // internal deadline left blank
+    iso(r.close_date || r.posted_date || ""),
+    mechanism(r),
+    "New",
+    "Department Review",
+    "Imported by BrassLoom (CSV) on "+today
+  ]);
+  const csv = [header.join(",")].concat(rows2.map(r=>r.map(v=>JSON.stringify(v||"")).join(","))).join("\n");
+  const blob = new Blob([csv], {type:"text/csv"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "GSU_import_starred.csv"; a.click();
+}
+document.getElementById("exportCSV").onclick = ()=>{
+  const rows = DATA.filter(r=>STAR.has(r.url||r.id||r.title));
+  if (!rows.length) { alert("No starred items."); return; }
+  exportCSV(rows);
+};
+document.getElementById("exportGSU").onclick = ()=>{
+  const rows = DATA.filter(r=>STAR.has(r.url||r.id||r.title));
+  if (!rows.length) { alert("No starred items."); return; }
+  exportGSUCSV(rows);
+};
+
+let DATA = [];
+function rowHtml(r){
+  const tags = (r.tags||[]).map(t=>`<span class="tag">${t}</span>`).join(" ");
+  const scoreClass = r.hbcu_msi_score >= 20 ? "good" : (r.hbcu_msi_score >= 10 ? "" : "warn");
+  return `<tr>
+    <td class="score ${scoreClass}">${r.hbcu_msi_score ?? ""}</td>
+    <td>
+      <a href="${r.url}" target="_blank">${r.title}</a>
+      <div class="muted">${r.description || ""}</div>
+      <div>${tags}</div>
+    </td>
+    <td>${r.agency || r.source || ""}</td>
+    <td>${r.posted_date || ""}</td>
+    <td>${r.close_date || ""}</td>
+    <td>${r.eligibility || ""}</td>
+  </tr>`
+}
+function render(){
+  const kw = (document.getElementById("filter").value||"").toLowerCase().trim();
+  const min = parseInt(document.getElementById("minScore").value||"0",10);
+  const tbody = document.querySelector("#tbl tbody");
+  tbody.innerHTML = "";
+  DATA
+    .filter(r => !kw || JSON.stringify(r).toLowerCase().includes(kw))
+    .filter(r => !min || (r.hbcu_msi_score||0) >= min)
+    .forEach(r => tbody.insertAdjacentHTML("beforeend", rowHtml(r)));
+  document.getElementById("status").textContent = `${tbody.children.length} opportunities shown`;
+}
+document.getElementById("sortScore").onclick = ()=>{ DATA.sort((a,b)=>(b.hbcu_msi_score||0)-(a.hbcu_msi_score||0)); render(); };
+document.getElementById("sortDate").onclick = ()=>{ DATA.sort((a,b)=>String(b.posted_date||"").localeCompare(String(a.posted_date||""))); render(); };
+document.getElementById("filter").oninput = render;
+document.getElementById("minScore").oninput = render;
+document.getElementById("loadSample").onclick = async ()=>{
+  try {
+    const res = await fetch("opportunities_sample.json");
+    if (!res.ok) throw new Error("Fetch failed");
+    DATA = await res.json();
+    // Assign fallback score if missing
+    DATA.forEach(d=>{ if(typeof d.hbcu_msi_score==="undefined"){ d.hbcu_msi_score = /HBCU|MSI|minority/i.test(JSON.stringify(d)) ? 25 : 5; } });
+    render();
+  } catch(e){
+    alert("Could not auto-load. Use the file picker to load a JSON file located next to this HTML.");
+  }
+};
+document.getElementById("fileInput").addEventListener("change", async (evt)=>{
+  const f = evt.target.files[0];
+  if (!f) return;
+  const text = await f.text();
+  try {
+    DATA = JSON.parse(text);
+    render();
+  } catch(e){
+    alert("Invalid JSON");
+  }
+});
+
+// Try auto-load on startup (if JSON sits next to the HTML file)
+document.getElementById("loadSample").click();
+</script>
+</body>
+</html>
