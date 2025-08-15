@@ -165,7 +165,7 @@ document.getElementById("filter").oninput = render;
 document.getElementById("minScore").oninput = render;
 document.getElementById("loadSample").onclick = async ()=>{
   try {
-    const res = await fetch("opportunities_sample.json");
+    const res = await fetch('https://graysinghlab.github.io/brassloom/opportunities.json?ts=' + Date.now());
     if (!res.ok) throw new Error("Fetch failed");
     DATA = await res.json();
     // Assign fallback score if missing
