@@ -1,0 +1,61 @@
+name: BrassLoom Daily
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "30 12 * * *"   # runs daily at 12:30 UTC; adjust later if you want
+
+permissions:
+  contents: write
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run BrassLoom (create opportunities.json and update workbook)
+        run: |
+          # If a sample is present and no live file yet, seed it so the dashboard works immediately
+          if [ -f opportunities_sample.json ] && [ ! -f opportunities.json ]; then
+            cp opportunities_sample.json opportunities.json
+          fi
+          # Try the full pipeline; if it fails, we still keep the seeded file
+          python brassloom_cli.py --days 60 --gsu GSU_Cayuse_Lite.xlsx || echo "Pipeline run failed; using any existing opportunities.json"
+
+      - name: Prepare dashboard for GitHub Pages
+        run: |
+          mkdir -p docs
+          cp brassloom.html docs/index.html
+          if [ -f opportunities.json ]; then
+            cp opportunities.json docs/opportunities.json
+          elif [ -f opportunities_sample.json ]; then
+            cp opportunities_sample.json docs/opportunities.json
+          else
+            echo "[]" > docs/opportunities.json
+          fi
+
+      - name: Commit changes (docs + updated workbook)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "BrassLoom auto-update" || echo "No changes to commit"
+          git push
+
+      - name: Upload latest workbook as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GSU_Cayuse_Lite-latest
+          path: GSU_Cayuse_Lite.xlsx
