@@ -1,0 +1,54 @@
+[
+  {
+    "id": "NSF-23-563",
+    "source": "NSF",
+    "title": "Historically Black Colleges and Universities \u2014 Undergraduate Program (HBCU\u2011UP)",
+    "agency": "National Science Foundation",
+    "assistance_listing": "47.076",
+    "posted_date": "2023-02-28",
+    "close_date": "",
+    "eligibility": "HBCUs as lead institutions; partnerships encouraged",
+    "url": "https://www.nsf.gov/funding/opportunities/hbcu-historically-black-colleges-universities-undergraduate/nsf23-563/solicitation",
+    "tags": [
+      "HBCU",
+      "Undergraduate STEM",
+      "Capacity Building"
+    ],
+    "description": "HBCU\u2011UP supports Implementation, Targeted Infusion, Research Initiation Awards, and BPR Centers with FY 2024\u20132025 funding. Estimated award sizes vary by track."
+  },
+  {
+    "id": "NASA-MUREP-ACEIR-2.0",
+    "source": "NASA NSPIRES",
+    "title": "MUREP Aeronautics Community Engagement Impact Research (ACEIR) 2.0",
+    "agency": "NASA",
+    "assistance_listing": "",
+    "posted_date": "2025-06-16",
+    "close_date": "",
+    "eligibility": "Minority Serving Institutions",
+    "url": "https://nspires.nasaprs.com/external/solicitations/summary.do?method=init&path=&solId=%7B5606D359-5AFF-9DA7-F75B-1395607C38DC%7D",
+    "tags": [
+      "MSI",
+      "Aeronautics",
+      "Community Impact",
+      "MUREP"
+    ],
+    "description": "Funding opportunity focused on aeronautics community engagement research with MSI leadership and participation."
+  },
+  {
+    "id": "NIH-Guide-Weekly",
+    "source": "NIH",
+    "title": "NIH Guide for Grants and Contracts \u2014 Weekly Index",
+    "agency": "NIH",
+    "assistance_listing": "",
+    "posted_date": "2025-08-15",
+    "close_date": "",
+    "eligibility": "Varies by FOA",
+    "url": "https://grants.nih.gov/grants/guide/weeklyindex.cfm",
+    "tags": [
+      "Biomedical",
+      "Multiple Mechanisms",
+      "FOA Stream"
+    ],
+    "description": "Weekly roundup of NIH funding opportunity announcements and notices; subscribe via RSS to monitor updates in real time."
+  }
+]

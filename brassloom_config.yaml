@@ -1,0 +1,31 @@
+keywords:
+- HBCU
+- MSI
+- minority serving
+- HSI
+- Tribal
+- TCU
+- Alaska Native
+- Native Hawaiian
+- Black
+- broadening participation
+- EPSCoR
+weights:
+  HBCU: 20
+  MSI: 15
+  keyword: 10
+  deadline_lt_30: 10
+  deadline_lt_60: 5
+internal_deadline_offset_days: 7
+default_status: Department Review
+default_proposal_type: New
+default_pi:
+  id: ''
+  name: ''
+  dept: ''
+  college: ''
+mechanism_map:
+  Grants.gov: Grants.gov
+  NSF: Research.gov
+  NIH: S2S (eRA)
+  NASA: Sponsor Portal
