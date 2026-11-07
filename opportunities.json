@@ -1,5 +1,19 @@
 [
   {
+    "id": "https://www.nsf.gov/funding/opportunities/mri-major-research-instrumentation-program",
+    "source": "NSF Funding",
+    "title": "Major Research Instrumentation Program (MRI)",
+    "agency": "NSF Funding",
+    "assistance_listing": "",
+    "posted_date": "2026-11-06",
+    "close_date": "",
+    "eligibility": "",
+    "url": "https://www.nsf.gov/funding/opportunities/mri-major-research-instrumentation-program",
+    "tags": [],
+    "description": "The Major Research Instrumentation (MRI) Program (MRI Website) increases access to multi-user scientific and engineering instrumentation for research and training in the operation of the proposed equipment. An MRI award supports the acquisition of a multi-user research instrument through direct purchase from a vendor, or for the personnel and components required to develop an instrument with new capabilities that opens new opportunities to advance the frontiers in science and engineering research. MRI instruments are generally too costly and/or not appropriate for support through other NSF programs.MRI encourages proposals from early-career researchers, from all geographic regions, including&nbsp;EPSCoR jurisdictions, and from emerging research institutions, where MRI can significantly build capacity for research. The program especially welcomes proposals for instruments that will advance discovery in one or more&nbsp;national R&amp;D priority areas, including capability for scientifically justified integration with SI-enabled workflows.&nbsp;",
+    "hbcu_msi_score": 10
+  },
+  {
     "id": "https://www.nsf.gov/funding/opportunities/mps-astro-mps-astronomical-sciences-research-programs",
     "source": "NSF Funding",
     "title": "MPS Astronomical Sciences Research Programs (MPS Astro)",
